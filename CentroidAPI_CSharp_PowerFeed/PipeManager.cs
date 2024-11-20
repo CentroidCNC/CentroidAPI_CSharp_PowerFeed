@@ -75,7 +75,8 @@ namespace CentroidAPI_CSharp_PowerFeed
                     }
                 }
             }
-            return "Unknown";
+            // return default directory if we failed for some reason
+            return "C:\\cncm";
         }
 
         /// <summary>

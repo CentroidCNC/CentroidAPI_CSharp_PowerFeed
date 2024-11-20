@@ -7,6 +7,9 @@ namespace CentroidAPI_CSharp_PowerFeed
         private PipeManager CNCPipeManager;
         private Thread cnc12_isRunning_thread;
 
+        /// <summary>
+        /// Initialize componets and pipe manager
+        /// </summary>
         public frmMeasureDoor()
         {
             InitializeComponent();
@@ -14,6 +17,11 @@ namespace CentroidAPI_CSharp_PowerFeed
             CNCPipeManager = new PipeManager();
         }
 
+        /// <summary>
+        /// On form load, check if we're connected then throw a message and exit, otherwise begin watching for CNC12
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void frmMeasureDoor_Load(object sender, EventArgs e)
         {
             if (!CNCPipeManager.ConnectedToCNC12())
@@ -32,6 +40,11 @@ namespace CentroidAPI_CSharp_PowerFeed
 
         }
 
+        /// <summary>
+        /// Appends the character on the pressed button to the txtDoorMeasure textbox
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnEnterNumber_Click(object sender, EventArgs e)
         {
             Button ClickedButton = (Button)sender;
@@ -52,6 +65,11 @@ namespace CentroidAPI_CSharp_PowerFeed
             }
         }
 
+        /// <summary>
+        /// Clears the text for txtDoorMeasure textbox
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnEnterClear_Click(object sender, EventArgs e)
         {
             this.txtDoorMeasure.Clear();
@@ -103,12 +121,14 @@ namespace CentroidAPI_CSharp_PowerFeed
             {
                 try
                 {
+                    // if we are connected, display in the title bar
                     if (CNCPipeManager.ConnectedToCNC12())
                     {
                         ChangeTitleBarText("Power Feed App - Connected to CNC12");
                     }
                     else
                     {
+                        // if we are disconnected, display in the title bar
                         ChangeTitleBarText("Power Feed App - Disconnected from CNC12");
                     }
                 }
@@ -143,28 +163,33 @@ namespace CentroidAPI_CSharp_PowerFeed
         }
 
         /// <summary>
-        /// 
+        /// Sends the command for moving the X axis to the absolute position entered in txtDoorMeasure textbox
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void picCycleStart_Click(object sender, EventArgs e)
         {
+            // check that textbox text is not empty
             if (this.txtDoorMeasure.Text.Trim() != "")
             {
+                // try to convert the value of textbox text to a double
                 double xVal = Convert.ToDouble(this.txtDoorMeasure.Text);
+                // send the value and the feedrate value from settings to the SendXMoveCommand so movement command can be created
                 if (SendXMoveCommand(xVal, Properties.Settings.Default.dblFeedRate) == CNCPipe.ReturnCode.SUCCESS)
                 {
+                    // if the movement command succeeded then clear the text
                     this.txtDoorMeasure.Clear();
                 }
                 else
                 {
+                    // throw a message that an error occured, needs better error handling but this will work for example
                     MessageBox.Show("An Error has occured...");
                 }
             }
         }
 
         /// <summary>
-        /// 
+        /// Attempts to cancel the currently running command or job
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -177,7 +202,7 @@ namespace CentroidAPI_CSharp_PowerFeed
         }
 
         /// <summary>
-        /// 
+        /// Opens the frmFeedrate window to edit desired feedrate
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
