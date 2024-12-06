@@ -85,41 +85,39 @@ namespace CentroidAPI_CSharp_PowerFeed
         /// <returns>True if connected to CNC12 Pipe; False otherwise.</returns>
         public bool ConnectedToCNC12()
         {
-            // IMPORTANT: On Error Resume Next tells the compiler to ignore errors, be careful as it may cause unintended side effects.
-            // A Try Catch would be better here but the debugger breaks on errors inside of the try catch and this bypasses that
-            // Since param.GetMachineParameterValue(1, paramValue) will cause an 'object reference not set to instance of an object'
-            // error when called on a dead pipe. 
-
-            if (m_pipe != null && m_pipe.IsConstructed())
-            {
-                double paramValue = 0;
-                var param = new CentroidAPI.CNCPipe.Parameter(m_pipe);
-                CNCPipe.ReturnCode returnCode = param.GetMachineParameterValue(1, out paramValue);
-
-                switch (returnCode)
+            try { 
+                if (m_pipe != null && m_pipe.IsConstructed())
                 {
-                    case CNCPipe.ReturnCode.SUCCESS:
-                        // Successfully connected to CNC12
-                        return true;
-                    case CNCPipe.ReturnCode.ERROR_PIPE_IS_BROKEN:
-                        // Recreate the pipe if it is broken
-                        m_pipe = new CNCPipe();
-                        break;
-                    case CNCPipe.ReturnCode.ERROR_CLIENT_LOCKED:
-                        // Client locked means we are still connected but the client is locked, don't treat this as a disconnection
-                        return true;
-                    default:
-                        // Any other error means disconnection
-                        return false;
-                }
-            }
-            else
-            {
-                // Pipe is not constructed; try to recreate it
-                m_pipe = new CNCPipe();
-            }
+                    double paramValue = 0;
+                    var param = new CentroidAPI.CNCPipe.Parameter(m_pipe);
+                    CNCPipe.ReturnCode returnCode = param.GetMachineParameterValue(1, out paramValue);
 
-            // Return false if connection is not established
+                    switch (returnCode)
+                    {
+                        case CNCPipe.ReturnCode.SUCCESS:
+                            // Successfully connected to CNC12
+                            return true;
+                        case CNCPipe.ReturnCode.ERROR_PIPE_IS_BROKEN:
+                            // Recreate the pipe if it is broken
+                            m_pipe = new CNCPipe();
+                            break;
+                        case CNCPipe.ReturnCode.ERROR_CLIENT_LOCKED:
+                            // Client locked means we are still connected but the client is locked, don't treat this as a disconnection
+                            return true;
+                        default:
+                            // Any other error means disconnection
+                            return false;
+                    }
+                }
+                else
+                {
+                    // Pipe is not constructed; try to recreate it
+                    m_pipe = new CNCPipe();
+                }
+            } catch (Exception) { 
+                
+            }
+            // Return false if connection is not established or we failed the try catch
             return false;
         }
 
@@ -191,7 +189,7 @@ namespace CentroidAPI_CSharp_PowerFeed
         }
 
         /// <summary>
-        /// Uses Skinning Events to emulate cycle start, warning this will start the job if CNC12 is on a screen that allows cycle start. 
+        /// Uses Skinning Events to emulate cycle start, warning: this will start the job if CNC12 is on a screen that allows cycle start. 
         /// Use with Caution. Operators should have to press cycle start to begin machine motion.
         /// </summary>
         /// <returns>Returns a ReturnCode</returns>
